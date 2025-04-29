@@ -46,7 +46,7 @@ const SendReportForm = () => {
           type="text"
           name="district"
           value={report.district}
-          placeholder="District (e.g. Gasabo)"
+          placeholder="District "
           onChange={handleChange}
           required
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -56,7 +56,7 @@ const SendReportForm = () => {
           type="text"
           name="sector"
           value={report.sector}
-          placeholder="Sector (e.g. Kacyiru)"
+          placeholder="Sector "
           onChange={handleChange}
           required
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -66,7 +66,7 @@ const SendReportForm = () => {
           type="text"
           name="cell"
           value={report.cell}
-          placeholder="Cell (e.g. Rugando)"
+          placeholder="Cell"
           onChange={handleChange}
           required
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -76,7 +76,7 @@ const SendReportForm = () => {
           type="number"
           name="phoneNumber"
           value={report.phoneNumber}
-          placeholder="Phone Number (e.g. 0789123456)"
+          placeholder="Phone Number (e.g. +250)"
           onChange={handleChange}
           required
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
