@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { loginUser } from "../../api_service/auth/auth";
@@ -31,18 +31,16 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      
       <div className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
         <div className="text-xl font-semibold text-blue-700">ASF</div>
         <div className="flex gap-1 items-center">
-          <WiMoonAltWaningCrescent1 color="blue"  size={20}/>
+          <WiMoonAltWaningCrescent1 color="blue" size={20} />
           <button className="text-blue-600 hover:text-blue-700 font-semibold">
             theme
           </button>
         </div>
       </div>
 
-      
       <div className="flex-grow flex items-center justify-center">
         <div className="w-full max-w-md bg-white rounded-2xl border-[1px] border-gray-100 p-8">
           <h2 className="text-3xl font-extrabold text-center text-blue-700 mb-6">
@@ -93,9 +91,9 @@ export default function SignIn() {
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:underline">
+            <Link to="/signup" className="text-blue-600 hover:underline">
               Create one
-            </a>
+            </Link>
           </p>
         </div>
       </div>
