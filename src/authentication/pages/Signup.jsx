@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../api_service/auth/auth";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -142,9 +142,9 @@ export default function Signup() {
 
           <p className="mt-6 text-center text-sm text-gray-600">
             Already registered?{" "}
-            <a href="/" className="text-blue-600 hover:underline">
-              Login here
-            </a>
+            <Link to="/" className="text-blue-600 hover:underline">
+              Sign in
+            </Link>
           </p>
         </div>
       </div>
