@@ -43,7 +43,7 @@ export default function Signup() {
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       <div className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div className="text-xl font-semibold text-blue-700">ASFN</div>
+        <div className="text-xl font-semibold text-blue-700">ASF</div>
         <div className="flex gap-1 items-center">
           <WiMoonAltWaningCrescent1 color="blue" size={20} />
           <button className="text-blue-600 hover:text-blue-700 font-semibold">
@@ -69,12 +69,12 @@ export default function Signup() {
                 placeholder="e.g. Emmanuel"
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-semibold text-gray-700">
+              <label className="block mb-1 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 Last Name
               </label>
               <input
@@ -83,12 +83,12 @@ export default function Signup() {
                 placeholder="e.g. Nzayisenga"
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-semibold text-gray-700">
+              <label className="block mb-1 text-sm font-semibold text-gray-700focus:outline-none focus:ring-2 focus:ring-blue-500">
                 Email
               </label>
               <input
@@ -97,7 +97,7 @@ export default function Signup() {
                 placeholder="e.g. you@example.com"
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" 
               />
             </div>
 
@@ -111,12 +111,12 @@ export default function Signup() {
                 placeholder="Enter password"
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-semibold text-gray-700">
+              <label className="block mb-1 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 Confirm Password
               </label>
               <input
@@ -125,7 +125,7 @@ export default function Signup() {
                 placeholder="Re-enter password"
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 

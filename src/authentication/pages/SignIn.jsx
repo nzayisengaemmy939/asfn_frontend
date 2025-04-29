@@ -33,7 +33,7 @@ export default function SignIn() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       
       <div className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div className="text-xl font-semibold text-blue-700">ASFN</div>
+        <div className="text-xl font-semibold text-blue-700">ASF</div>
         <div className="flex gap-1 items-center">
           <WiMoonAltWaningCrescent1 color="blue"  size={20}/>
           <button className="text-blue-600 hover:text-blue-700 font-semibold">
