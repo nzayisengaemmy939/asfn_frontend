@@ -67,7 +67,7 @@ export const getReports = async (setReports, setIsLoading) => {
 
     const response = await axios.get(`${frontend}/report/all`);
     setReports(response.data);
-    console.log(response.data, "data to know");
+    console.log(response.data, "report data");
   } catch (err) {
     console.error("Error fetching data:", err);
   } finally {
@@ -210,3 +210,31 @@ console.log('token',token)
     toast.error(error.response?.data || { message: "An error occurred" })
   }
 };
+
+export const updateReportStatus = async (reportId, status, setIsLoading) => {
+  const validStatuses = ["pending", "received", "resolved"];
+  if (!validStatuses.includes(status)) {
+    toast.error("Invalid status. Must be one of: pending, received, resolved");
+    return false;
+  }
+
+  setIsLoading(true);
+  try {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const response = await axios.put(`${backendUrl}/report/status/${reportId}`, { status });
+
+    if (response.status === 200) {
+      toast.success(`Report status updated to ${status} successfully`);
+      return true;
+    } else {
+      toast.error("Failed to update report status");
+      return false;
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "An error occurred while updating status");
+    console.error("Error updating report status:", error);
+    return false;
+  } finally {
+    setIsLoading(false);
+  }
+}

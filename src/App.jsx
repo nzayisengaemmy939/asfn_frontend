@@ -4,6 +4,7 @@ import Signup from './authentication/pages/Signup';
 import FarmerDashboard from './dashboard/FarmerDashboard';
 import VeterinarianDashboard from './dashboard/VeterinarianDashboard';
 import AuthorityDashboard from './dashboard/AuthorityDashboard';
+import ProfilePage from './authentication/components/ProfilePage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
 
         {/* Sign up page */}
         <Route path="/signup" element={<Signup />} />
+        <Route path="/profile/:id" element={<ProfilePage />} />
         <Route path="/dashboard" element={<FarmerDashboard />} />
         <Route path="/veteri-dashboard" element={<VeterinarianDashboard />} />
         <Route path="/authority-dashboard" element={<AuthorityDashboard />} />

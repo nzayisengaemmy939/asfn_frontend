@@ -218,3 +218,33 @@ export const updateProfile = async (userId, userData, setIsLoading) => {
 //     throw error;
 //   }
 // };
+
+//get user by id
+
+export const getUserById = async (userId, setUser, setIsLoading) => {
+  try {
+    setIsLoading(true);
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/auth/get/profile/${userId}`
+    );
+    setUser(response.data.data);
+    // console.log("User data:", response.data.data); // Check console for data
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+export function getUserId() {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.userId; // Returns user ID from token
+  } catch {
+    return null;
+  }
+}
