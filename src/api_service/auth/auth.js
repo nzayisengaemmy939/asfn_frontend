@@ -49,10 +49,10 @@ export const loginUser = async (formData, navigate, setIsLoading) => {
         navigate("/dashboard");
       }
       if (decoded.role == "authority") {
-        navigate("/authority-dashboard");
+        navigate("/veteri-dashboard");
       }
       if (decoded.role == "veterinarian") {
-        navigate("/veteri-dashboard");
+        navigate("/authority-dashboard");
       }
 
       console.log("Navigating to dashboard");
@@ -100,6 +100,29 @@ export const loginUser = async (formData, navigate, setIsLoading) => {
 //     setIsLoading(false);
 //   }
 // };
+
+export const updateUserRole = async (userId, newRole) => {
+  try {
+    const response = await fetch(`/api/users/${userId}/role`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization headers if needed
+        // 'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ role: newRole })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update user role');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    throw error;
+  }
+};
 
 export const getProfile = async (setProfile, setIsLoading) => {
   const frontend = import.meta.env.VITE_BACKEND_URL;
