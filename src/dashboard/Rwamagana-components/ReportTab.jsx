@@ -25,6 +25,7 @@ const ReportsTab = ({
   // Internal state for tab management
   const [activeTab, setActiveTab] = useState("all");
   const [selectedCell, setSelectedCell] = useState("all");
+  const [selectedTimeFilter, setSelectedTimeFilter] = useState("all"); // New time filter state
   const [reports, setReports] = useState([]);
   const [loading, setIsLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -39,11 +40,55 @@ const ReportsTab = ({
     "Nyakaliro",
   ];
 
+  // Time filter options
+  const timeFilterOptions = [
+    { value: "all", label: "All Time" },
+    { value: "weekly", label: "This Week" },
+    { value: "monthly", label: "This Month" },
+    { value: "yearly", label: "This Year" },
+  ];
+
   console.log(reports, "all reports");
 
   useEffect(() => {
     getReports(setReports, setIsLoading);
   }, []);
+
+  // Helper function to filter reports by time
+  const filterReportsByTime = (reportsArray, timeFilter) => {
+    if (timeFilter === "all") return reportsArray;
+    
+    const now = new Date();
+    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return reportsArray.filter(report => {
+      const reportDate = new Date(report.createdAt);
+      const reportDateOnly = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate());
+      
+      switch (timeFilter) {
+        case "weekly":
+          // Get the start of the current week (Sunday)
+          const startOfWeek = new Date(currentDate);
+          startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+          
+          // Get the end of the current week (Saturday)
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(startOfWeek.getDate() + 6);
+          
+          return reportDateOnly >= startOfWeek && reportDateOnly <= endOfWeek;
+          
+        case "monthly":
+          return reportDate.getMonth() === now.getMonth() && 
+                 reportDate.getFullYear() === now.getFullYear();
+          
+        case "yearly":
+          return reportDate.getFullYear() === now.getFullYear();
+          
+        default:
+          return true;
+      }
+    });
+  };
 
   const getFilteredReports = () => {
     if (!reports || !Array.isArray(reports)) {
@@ -70,6 +115,9 @@ const ReportsTab = ({
     if (selectedCell !== "all") {
       filteredReports = filteredReports.filter((r) => r.cell === selectedCell);
     }
+
+    // Apply time filter
+    filteredReports = filterReportsByTime(filteredReports, selectedTimeFilter);
 
     return filteredReports;
   };
@@ -159,7 +207,7 @@ const ReportsTab = ({
     }
   };
 
-  // Get report counts for each category
+  // Get report counts for each category (based on all reports, not filtered)
   const getReportCounts = () => {
     // Safety check: return zeros if reports is undefined or null
     if (!reports || !Array.isArray(reports)) {
@@ -170,9 +218,17 @@ const ReportsTab = ({
       };
     }
 
-    const allReports = reports;
-    const farmerReports = reports.filter((r) => r.senderRole === "farmer");
-    const vetReports = reports.filter((r) => r.senderRole === "authority");
+    // Apply time filter to all reports first
+    const timeFilteredReports = filterReportsByTime(reports, selectedTimeFilter);
+    
+    // Apply cell filter if selected
+    const cellAndTimeFiltered = selectedCell !== "all" 
+      ? timeFilteredReports.filter((r) => r.cell === selectedCell)
+      : timeFilteredReports;
+
+    const allReports = cellAndTimeFiltered;
+    const farmerReports = cellAndTimeFiltered.filter((r) => r.senderRole === "farmer");
+    const vetReports = cellAndTimeFiltered.filter((r) => r.senderRole === "authority");
 
     return {
       all: allReports.length,
@@ -226,6 +282,11 @@ const ReportsTab = ({
       
       if (selectedCell !== "all") {
         subtitle += ` | ${selectedCell} Cell`;
+      }
+
+      if (selectedTimeFilter !== "all") {
+        const timeFilterLabel = timeFilterOptions.find(option => option.value === selectedTimeFilter)?.label;
+        subtitle += ` | ${timeFilterLabel}`;
       }
       
       subtitle += ` | ${currentReports.length} Reports`;
@@ -315,6 +376,9 @@ const ReportsTab = ({
       if (selectedCell !== "all") {
         filename += `_${selectedCell}`;
       }
+      if (selectedTimeFilter !== "all") {
+        filename += `_${selectedTimeFilter}`;
+      }
       filename += `_${new Date().toISOString().split('T')[0]}.pdf`;
       
       console.log("Saving PDF with filename:", filename);
@@ -377,7 +441,7 @@ const ReportsTab = ({
         </div>
 
         {/* Filter and Download Section */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
           {/* Cell Filter Dropdown */}
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -393,6 +457,27 @@ const ReportsTab = ({
                 {availableCells.map((cell) => (
                   <option key={cell} value={cell}>
                     {cell}
+                  </option>
+                ))}
+              </select>
+              <BiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Time Filter Dropdown */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Time
+            </label>
+            <div className="relative w-full sm:w-64">
+              <select
+                value={selectedTimeFilter}
+                onChange={(e) => setSelectedTimeFilter(e.target.value)}
+                className="w-full px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 appearance-none cursor-pointer"
+              >
+                {timeFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>
@@ -453,6 +538,15 @@ const ReportsTab = ({
                   {selectedCell}
                 </span>{" "}
                 cell
+              </span>
+            )}
+            {selectedTimeFilter !== "all" && (
+              <span>
+                {" "}
+                for{" "}
+                <span className="font-semibold text-purple-600">
+                  {timeFilterOptions.find(option => option.value === selectedTimeFilter)?.label.toLowerCase()}
+                </span>
               </span>
             )}
           </p>

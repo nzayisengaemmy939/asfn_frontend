@@ -104,6 +104,7 @@ const ReportsTab = ({
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showReplyModal, setShowReplyModal] = useState(null);
   const [userNames, setUserNames] = useState({}); // Store user names by ID
+  console.log(userNames,'username')
 
   useEffect(() => {
     const fetchUserNames = async () => {
@@ -708,7 +709,7 @@ const ReportsTab = ({
 
       {/* Reply Modal */}
       {showReplyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 ">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[700px] mx-4">
             <ReplyComponent
               reportId={showReplyModal}
