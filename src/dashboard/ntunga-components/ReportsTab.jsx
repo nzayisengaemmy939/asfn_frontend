@@ -1,10 +1,12 @@
-import { BiChevronDown, BiDotsVerticalRounded } from "react-icons/bi";
+import { BiChevronDown, BiDotsVerticalRounded, BiDownload } from "react-icons/bi";
 import { useState, useEffect } from "react";
 import EditReport from "../../authentication/components/EditReeport";
 import DeleteReport from "../../authentication/components/DeleteReport";
 import ReplyComponent from "../../authentication/components/ReplyComponent";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { getUserById } from "../../api_service/auth/auth";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const ReportsTab = ({
   reportTab,
@@ -25,8 +27,9 @@ const ReportsTab = ({
   handleDeleteConfirmed2,
   userToken,
 }) => {
-  // State for cell filtering
+  // State for cell filtering and PDF loading
   const [selectedCell, setSelectedCell] = useState("all");
+  const [pdfLoading, setPdfLoading] = useState(false);
   
   // Available cells for filtering
   const availableCells = ["Gatare", "Karogo", "Kadasumbwa", "Ruseshe", "Nyakaliro"];
@@ -163,6 +166,135 @@ const ReportsTab = ({
 
   const reportCounts = getReportCounts();
 
+  // PDF Download Function
+  const downloadPDF = async () => {
+    if (currentReports.length === 0) {
+      toast.error("No reports to download!");
+      return;
+    }
+
+    setPdfLoading(true);
+    
+    try {
+      console.log("Starting PDF generation...");
+      
+      // Create new PDF document
+      const doc = new jsPDF();
+      
+      // Set up the document
+      const pageWidth = doc.internal.pageSize.width;
+      
+      // Title
+      doc.setFontSize(20);
+      doc.text("Reports Export", pageWidth / 2, 20, { align: "center" });
+      
+      // Subtitle with filter information
+      doc.setFontSize(12);
+      let subtitle = `Generated on ${new Date().toLocaleDateString()}`;
+      
+      if (reportTab !== "all") {
+        subtitle += ` | ${reportTab.charAt(0).toUpperCase() + reportTab.slice(1)} Reports`;
+      }
+      
+      if (selectedCell !== "all") {
+        subtitle += ` | ${selectedCell} Cell`;
+      }
+      
+      subtitle += ` | ${currentReports.length} Reports`;
+      
+      doc.text(subtitle, pageWidth / 2, 30, { align: "center" });
+      
+      // Prepare table data
+      const tableColumns = [
+        "District",
+        "Sector", 
+        "Cell",
+        "Symptoms",
+        "Pigs Affected",
+        "Assigned Vet",
+        "Status",
+        "Sender Role",
+        "Reported By",
+        "Created At"
+      ];
+      
+      const tableRows = currentReports.map((report) => {
+        return [
+          String(report.district || "N/A"),
+          String(report.sector || "N/A"),
+          String(report.cell || "N/A"),
+          String(report.symptoms ? 
+            (report.symptoms.length > 40 ? report.symptoms.substring(0, 40) + "..." : report.symptoms) 
+            : "N/A"),
+          String(report.numberOfPigsAffected || "N/A"),
+          String(report.assignedTo || "None"),
+          String(report.status || "N/A"),
+          String(report.senderRole || "N/A"),
+          String(userNames[report.reportedBy] || "Unknown"),
+          String(report.createdAt ? new Date(report.createdAt).toLocaleDateString() : "N/A")
+        ];
+      });
+      
+      // Add table using autoTable
+      doc.autoTable({
+        head: [tableColumns],
+        body: tableRows,
+        startY: 40,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [59, 130, 246], // Blue color
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252] // Light gray
+        },
+        columnStyles: {
+          3: { cellWidth: 35 }, // Symptoms column
+          9: { cellWidth: 25 }  // Created At column
+        },
+        margin: { top: 40, left: 8, right: 8, bottom: 20 },
+        didDrawPage: function (data) {
+          // Add page numbers
+          doc.setFontSize(10);
+          doc.text(
+            `Page ${data.pageNumber}`,
+            pageWidth - 20,
+            doc.internal.pageSize.height - 10,
+            { align: 'right' }
+          );
+        }
+      });
+      
+      // Generate filename
+      let filename = "reports_export";
+      if (reportTab !== "all") {
+        filename += `_${reportTab}`;
+      }
+      if (selectedCell !== "all") {
+        filename += `_${selectedCell}`;
+      }
+      filename += `_${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      toast.success("PDF downloaded successfully!");
+      
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF. Please try again.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 text-sm">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -173,7 +305,7 @@ const ReportsTab = ({
           {[
             { key: "all", label: "All Reports", count: reportCounts.all },
             { key: "farmer", label: "Farmer Reports", count: reportCounts.farmer },
-            { key: "veterinarian", label: "Veterinarian Reports", count: reportCounts.authority }
+            { key: "veterinarian", label: "Veterinarian Reports", count: reportCounts.veterinarian }
           ].map((tab) => (
             <button
               key={tab.key}
@@ -196,25 +328,55 @@ const ReportsTab = ({
           ))}
         </div>
 
-        {/* Cell Filter Dropdown */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Filter by Cell
-          </label>
-          <div className="relative w-64">
-            <select
-              value={selectedCell}
-              onChange={(e) => setSelectedCell(e.target.value)}
-              className="w-full px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
+        {/* Filter and Download Section */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          {/* Cell Filter Dropdown */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Filter by Cell
+            </label>
+            <div className="relative w-full sm:w-64">
+              <select
+                value={selectedCell}
+                onChange={(e) => setSelectedCell(e.target.value)}
+                className="w-full px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
+              >
+                <option value="all">All Cells</option>
+                {availableCells.map((cell) => (
+                  <option key={cell} value={cell}>
+                    {cell}
+                  </option>
+                ))}
+              </select>
+              <BiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* PDF Download Button */}
+          <div className="flex items-end">
+            <button
+              onClick={downloadPDF}
+              disabled={pdfLoading || currentReports.length === 0}
+              className={`
+                flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all duration-200
+                ${pdfLoading || currentReports.length === 0
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transform hover:scale-105"
+                }
+              `}
             >
-              <option value="all">All Cells</option>
-              {availableCells.map((cell) => (
-                <option key={cell} value={cell}>
-                  {cell}
-                </option>
-              ))}
-            </select>
-            <BiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              {pdfLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <BiDownload className="w-4 h-4" />
+                  Download PDF
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -261,12 +423,12 @@ const ReportsTab = ({
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Symptoms
                   </th>
-                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Pigs
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Vet
-                  </th> */}
+                  </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
@@ -321,12 +483,12 @@ const ReportsTab = ({
                       <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
                         {r.symptoms}
                       </td>
-                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
                         {r.numberOfPigsAffected}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {r.assignedTo || "None"}
-                      </td> */}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap relative">
                         <select
                           value={r.status}
