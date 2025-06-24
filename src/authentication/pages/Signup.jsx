@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../../api_service/auth/auth";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,8 @@ export default function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const navigate = useNavigate();
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -26,13 +29,14 @@ export default function Signup() {
       return;
     }
 
+    // Set loading state before API call
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      alert("Account created successfully!");
-      setIsLoading(false);
-      // Reset form
+    try {
+      // Call the API
+      await registerUser(formData, navigate, setIsLoading);
+      
+      // Reset form on success
       setFormData({
         firstName: "",
         lastName: "",
@@ -40,7 +44,13 @@ export default function Signup() {
         password: "",
         confirmPassword: "",
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Registration failed:", error);
+      // Handle error (you might want to show a toast or error message)
+    } finally {
+      // Always reset loading state
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -123,7 +133,8 @@ export default function Signup() {
             </p>
           </div>
 
-          <div className="space-y-4">
+          {/* FIXED: Added onSubmit handler to form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* First Name */}
             <div>
               <label className="block text-xs font-medium text-blue-700 mb-1">
@@ -288,7 +299,7 @@ export default function Signup() {
                 </>
               )}
             </button>
-          </div>
+          </form>
 
           <div className="mt-4 space-y-2">
             <p className="text-center text-xs text-blue-500">
@@ -298,7 +309,6 @@ export default function Signup() {
                 Sign in
               </button>
               </Link>
-             
             </p>
 
             <p className="text-center text-xs text-blue-400">
