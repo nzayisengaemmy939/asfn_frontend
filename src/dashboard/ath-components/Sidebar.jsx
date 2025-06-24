@@ -16,8 +16,8 @@ const Sidebar = ({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) => {
     { id: "Home", label: "Home", icon: BiHome },
     { id: "reports", label: "Reports", icon: FiFileText },
     { id: "Send report", label: "Send report", icon: BiPlus },
-    // { id: "trends", label: "Trends", icon: FiTrendingUp },
     { id: "users", label: "Users", icon: FiUsers },
+    { id: "guidance", label: "Add Guidance", icon: FiUsers },
   ];
 
   const handleLogout = () => {

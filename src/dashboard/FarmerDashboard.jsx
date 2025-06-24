@@ -21,10 +21,13 @@ import {
 import TrendComponent from "../authentication/components/trendComponent";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserId } from "../api_service/auth/auth";
+import { BiHome } from "react-icons/bi";
+import HomeTab from "./vet-components/HomeTab";
+import GuidanceComponent from "./farmer-components/Guidance";
 
 export default function FarmerDashboard() {
   const [previousReport, setPreviousReport] = useState([]);
-  const [activeTab, setActiveTab] = useState("sendReport");
+  const [activeTab, setActiveTab] = useState("Home");
   const [profile, setProfile] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -91,13 +94,17 @@ export default function FarmerDashboard() {
   };
 
   const menuItems = [
+   { id: "Home", label: "Home", icon: BiHome },
     { id: "sendReport", label: "Send Report", icon: FiPlus },
     { id: "previousReport", label: "Previous Reports", icon: FiFileText },
-    { id: "trends", label: "Trends", icon: FiTrendingUp },
+    { id: "Guidance", label: "Guidance", icon: FiTrendingUp },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case "Home":
+   
+  return <HomeTab />;
       case "sendReport":
         return (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -315,21 +322,8 @@ export default function FarmerDashboard() {
           </div>
         );
 
-      case "trends":
-        return (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Health Trends Analysis
-              </h2>
-              <p className="text-gray-600 mt-1">
-                View pig health trends and statistics in your area
-              </p>
-            </div>
-            <TrendComponent />
-          </div>
-        );
-
+      case "Guidance":
+      return <GuidanceComponent />
       default:
         return null;
     }
@@ -421,7 +415,7 @@ export default function FarmerDashboard() {
       {/* Main Content */}
       <div className="lg:ml-72 flex-1">
         {/* Header */}
-        <header className="bg-white fixed top-0 z-50 shadow-sm border-b border-gray-200 p-6">
+        <header className="bg-white fixed top-0 z-50 shadow-sm border-b border-gray-200 p-4 w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button

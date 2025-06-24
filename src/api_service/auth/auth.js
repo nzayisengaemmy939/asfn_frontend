@@ -49,10 +49,10 @@ export const loginUser = async (formData, navigate, setIsLoading) => {
         navigate("/dashboard");
       }
       if (decoded.role == "authority") {
-        navigate("/veteri-dashboard");
+         navigate("/authority-dashboard");
       }
       if (decoded.role == "veterinarian") {
-        navigate("/authority-dashboard");
+        navigate("/veteri-dashboard");
       }
 
       console.log("Navigating to dashboard");

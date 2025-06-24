@@ -12,7 +12,7 @@ export default function VeterinarianDashboard() {
   const [previousReport, setPreviousReport] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [assigned, setAssigned] = useState([]);
-  const [activeTab, setActiveTab] = useState("myReports");
+  const [activeTab, setActiveTab] = useState("Home");
   const [profile, setProfile] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);

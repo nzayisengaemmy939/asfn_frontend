@@ -5,6 +5,8 @@ import UsersTab from '../ath-components/UsersTab';
 
 import HomeTab from '../vet-components/HomeTab';
 import VetReportForm from '../../authentication/components/vetReportForm';
+import GuidanceComponent from './AddGuidance';
+import SendReportForm from '../../authentication/components/SendReportForm';
 
 const TabContent = ({ activeTab, ...props }) => {
   const renderTabContent = () => {
@@ -20,6 +22,8 @@ const TabContent = ({ activeTab, ...props }) => {
         return <VetReportForm />;
       // case "trends":
       //   return <TrendsTab />;
+      case "guidance":
+      return <><GuidanceComponent /></>;
       default:
         return null;
     }

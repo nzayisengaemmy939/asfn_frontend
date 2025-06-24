@@ -60,7 +60,7 @@ const Sidebar = ({
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">
-                      Dr. {profile.lastName || "Veterinarian"}
+                      {profile.lastName || "Veterinarian"}
                     </h3>
                     <p className="text-sm text-gray-500">Veterinarian</p>
                   </div>

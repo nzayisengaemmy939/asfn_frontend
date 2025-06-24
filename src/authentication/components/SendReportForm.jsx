@@ -6,8 +6,8 @@ const SendReportForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [previousReport, setPreviousReport] = useState(false);
   const [report, setReport] = useState({
-    district: "",
-    sector: "",
+    district: "Rwamagana",
+    sector: "Ntunga",
     cell: "",
     phoneNumber: "",
     symptoms: "",
@@ -25,8 +25,8 @@ const SendReportForm = () => {
       await registerReport(report, setIsLoading);
       setPreviousReport(report);
       setReport({
-        district: "",
-        sector: "",
+        district: "Rwamagana", // ✅ default here
+        sector: "Ntunga",
         cell: "",
         phoneNumber: "",
         symptoms: "",
@@ -49,6 +49,7 @@ const SendReportForm = () => {
           placeholder="District "
           onChange={handleChange}
           required
+          readOnly
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
@@ -59,18 +60,26 @@ const SendReportForm = () => {
           placeholder="Sector "
           onChange={handleChange}
           required
+          readOnly
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <input
-          type="text"
+        <select
           name="cell"
           value={report.cell}
-          placeholder="Cell"
           onChange={handleChange}
           required
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        >
+          <option value="" disabled>
+            Select Cell
+          </option>
+          <option value="Gatare">Gatare</option>
+          <option value="Karogo">Karogo</option>
+          <option value="Kadasumbwa">Kadasumbwa</option>
+          <option value="Ruseshe">Ruseshe</option>
+          <option value="Nyakaliro">Nyakaliro</option>
+        </select>
 
         <input
           type="number"

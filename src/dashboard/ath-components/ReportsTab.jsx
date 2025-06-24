@@ -2,12 +2,13 @@ import { BiChevronDown } from "react-icons/bi";
 import EditReport from "../../authentication/components/EditReeport";
 import DeleteReport from "../../authentication/components/DeleteReport";
 import ReplyComponent from "../../authentication/components/ReplyComponent";
+import { ToastContainer } from "react-toastify";
 
 const ReportsTab = ({
   reportTab,
   setReportTab,
   reports,
-  users,
+
   editMode,
   setEditMode,
   editingReportId,
@@ -28,6 +29,7 @@ const ReportsTab = ({
   return (
     <div className="space-y-6 text-sm">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <ToastContainer></ToastContainer>
         <div className="flex flex-wrap gap-2 mb-6">
           {["farmer", "veterinarian"].map((tab) => (
             <button
@@ -153,7 +155,7 @@ const ReportsTab = ({
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       {reportTab === "farmer" && (
                         <div className="flex items-center space-x-2">
-                          <select
+                          {/* <select
                             className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={r.assignedVet || ""}
                             onChange={(e) => assignVet(r._id, e.target.value)}
@@ -166,7 +168,7 @@ const ReportsTab = ({
                                   {v.email}
                                 </option>
                               ))}
-                          </select>
+                          </select> */}
                           <ReplyComponent
                             reportId={r._id}
                             senderRole="authority"

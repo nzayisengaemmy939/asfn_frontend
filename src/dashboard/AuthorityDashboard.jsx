@@ -29,9 +29,10 @@ import { Link } from "react-router-dom";
 import HomeTab from "./vet-components/HomeTab";
 import Sidebar from "./ath-components/Sidebar";
 import TabContent from "./ath-components/TabContent";
+import Header from "./ath-components/Header";
 
 export default function AuthorityDashboard() {
-  const [activeTab, setActiveTab] = useState("reports");
+  const [activeTab, setActiveTab] = useState("Home");
   const [reportTab, setReportTab] = useState("farmer");
   const [, setIsLoading] = useState(false);
   const [reports, setReports] = useState([]);
@@ -164,6 +165,7 @@ export default function AuthorityDashboard() {
 
       {/* Main Content */}
       <div className="lg:ml-72 flex-1">
+        <Header></Header>
         {/* Content */}
         <main className="p-6 mt-20 text-sm">
           <TabContent
