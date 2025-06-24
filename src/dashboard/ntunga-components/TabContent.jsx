@@ -1,7 +1,7 @@
 
 // 1. Main TabContent.jsx (Updated)
-import ReportsTab from '../ath-components/ReportsTab';
-import UsersTab from '../ath-components/UsersTab';
+import ReportsTab from '../ntunga-components/ReportsTab';
+import UsersTab from '../ntunga-components/UsersTab';
 
 import HomeTab from '../vet-components/HomeTab';
 import VetReportForm from '../../authentication/components/vetReportForm';

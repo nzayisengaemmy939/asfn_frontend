@@ -51,7 +51,7 @@ export const loginUser = async (formData, navigate, setIsLoading) => {
       if (decoded.role == "authority") {
          navigate("/authority-dashboard");
       }
-      if (decoded.role == "veterinarian") {
+      if (decoded.role == "admin") {
         navigate("/veteri-dashboard");
       }
 

@@ -27,9 +27,9 @@ import ReplyComponent from "../authentication/components/ReplyComponent";
 import { BiChevronDown, BiHome } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import HomeTab from "./vet-components/HomeTab";
-import Sidebar from "./ath-components/Sidebar";
-import TabContent from "./ath-components/TabContent";
-import Header from "./ath-components/Header";
+import Sidebar from "./ntunga-components/Sidebar";
+import TabContent from "./ntunga-components/TabContent";
+import Header from "./ntunga-components/Header";
 
 export default function AuthorityDashboard() {
   const [activeTab, setActiveTab] = useState("Home");

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../../api_service/auth/auth";
+import { ToastContainer } from "react-toastify";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -310,6 +311,7 @@ export default function Signup() {
               </button>
               </Link>
             </p>
+            <ToastContainer></ToastContainer>
 
             <p className="text-center text-xs text-blue-400">
               By signing up, you agree to our{" "}
