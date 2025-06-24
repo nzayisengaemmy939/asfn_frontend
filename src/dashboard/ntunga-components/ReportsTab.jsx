@@ -1,3 +1,4 @@
+
 import { BiChevronDown, BiDotsVerticalRounded, BiDownload } from "react-icons/bi";
 import { useState, useEffect } from "react";
 import EditReport from "../../authentication/components/EditReeport";
@@ -27,14 +28,42 @@ const ReportsTab = ({
   handleDeleteConfirmed2,
   userToken,
 }) => {
-  // State for cell filtering and PDF loading
+  // State for cell filtering, time filtering, and PDF loading
   const [selectedCell, setSelectedCell] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all"); // "all", "week", "month"
   const [pdfLoading, setPdfLoading] = useState(false);
   
   // Available cells for filtering
   const availableCells = ["Gatare", "Karogo", "Kadasumbwa", "Ruseshe", "Nyakaliro"];
   
-  // Filter reports based on current tab and selected cell
+  // Helper function to check if a date is within the current week
+  const isCurrentWeek = (date) => {
+    const now = new Date();
+    const reportDate = new Date(date);
+    
+    // Get the start of the current week (Sunday)
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    // Get the end of the current week (Saturday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    return reportDate >= startOfWeek && reportDate <= endOfWeek;
+  };
+
+  // Helper function to check if a date is within the current month
+  const isCurrentMonth = (date) => {
+    const now = new Date();
+    const reportDate = new Date(date);
+    
+    return reportDate.getFullYear() === now.getFullYear() && 
+           reportDate.getMonth() === now.getMonth();
+  };
+  
+  // Filter reports based on current tab, selected cell, and time filter
   const getFilteredReports = () => {
     let filteredReports = [];
     
@@ -55,6 +84,17 @@ const ReportsTab = ({
     // Apply cell filter if not "all"
     if (selectedCell !== "all") {
       filteredReports = filteredReports.filter((r) => r.cell === selectedCell);
+    }
+    
+    // Apply time filter
+    if (timeFilter === "week") {
+      filteredReports = filteredReports.filter((r) => 
+        r.createdAt && isCurrentWeek(r.createdAt)
+      );
+    } else if (timeFilter === "month") {
+      filteredReports = filteredReports.filter((r) => 
+        r.createdAt && isCurrentMonth(r.createdAt)
+      );
     }
     
     return filteredReports;
@@ -151,7 +191,7 @@ const ReportsTab = ({
     }
   };
 
-  // Get report counts for each category
+  // Get report counts for each category (with current filters applied)
   const getReportCounts = () => {
     const allReports = reports;
     const farmerReports = reports.filter((r) => r.senderRole === "farmer");
@@ -198,6 +238,12 @@ const ReportsTab = ({
       
       if (selectedCell !== "all") {
         subtitle += ` | ${selectedCell} Cell`;
+      }
+      
+      if (timeFilter === "week") {
+        subtitle += ` | Current Week Only`;
+      } else if (timeFilter === "month") {
+        subtitle += ` | Current Month Only`;
       }
       
       subtitle += ` | ${currentReports.length} Reports`;
@@ -280,6 +326,11 @@ const ReportsTab = ({
       if (selectedCell !== "all") {
         filename += `_${selectedCell}`;
       }
+      if (timeFilter === "week") {
+        filename += `_weekly`;
+      } else if (timeFilter === "month") {
+        filename += `_monthly`;
+      }
       filename += `_${new Date().toISOString().split('T')[0]}.pdf`;
       
       // Save the PDF
@@ -352,6 +403,25 @@ const ReportsTab = ({
             </div>
           </div>
 
+          {/* Time Filter Dropdown */}
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Time Filter
+            </label>
+            <div className="relative w-full sm:w-64">
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="w-full px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 appearance-none cursor-pointer"
+              >
+                <option value="all">All Time</option>
+                <option value="week">Current Week</option>
+                <option value="month">Current Month</option>
+              </select>
+              <BiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
           {/* PDF Download Button */}
           <div className="flex items-end">
             <button
@@ -390,6 +460,12 @@ const ReportsTab = ({
             {selectedCell !== "all" && (
               <span> in <span className="font-semibold text-green-600">{selectedCell}</span> cell</span>
             )}
+            {timeFilter === "week" && (
+              <span> from <span className="font-semibold text-purple-600">current week</span></span>
+            )}
+            {timeFilter === "month" && (
+              <span> from <span className="font-semibold text-purple-600">current month</span></span>
+            )}
           </p>
         </div>
 
@@ -423,12 +499,12 @@ const ReportsTab = ({
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Symptoms
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Pigs
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Vet
-                  </th>
+                  </th> */}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status
                   </th>
@@ -483,12 +559,12 @@ const ReportsTab = ({
                       <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
                         {r.symptoms}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
                         {r.numberOfPigsAffected}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {r.assignedTo || "None"}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap relative">
                         <select
                           value={r.status}
@@ -632,7 +708,7 @@ const ReportsTab = ({
 
       {/* Reply Modal */}
       {showReplyModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 ">
           <div className="bg-white rounded-lg p-6 w-[700px] mx-4">
             <ReplyComponent
               reportId={showReplyModal}
