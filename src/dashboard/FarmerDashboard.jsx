@@ -22,7 +22,7 @@ import TrendComponent from "../authentication/components/trendComponent";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserId } from "../api_service/auth/auth";
 import { BiHome } from "react-icons/bi";
-import HomeTab from "./vet-components/HomeTab";
+import HomeTab from "./Rwamagana-components/HomeTab";
 import GuidanceComponent from "./farmer-components/Guidance";
 
 export default function FarmerDashboard() {

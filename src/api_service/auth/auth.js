@@ -259,6 +259,21 @@ export const getUserById = async (userId, setUser, setIsLoading) => {
   }
 };
 
+export const getUserById2 = async (userId) => {
+  try {
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/auth/get/profile/${userId}`
+    );
+ 
+    // console.log("User data:", response.data.data); // Check console for data
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    
+  }
+};
+
 
 export function getUserId() {
   const token = localStorage.getItem('token');

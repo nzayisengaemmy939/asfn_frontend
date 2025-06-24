@@ -3,7 +3,7 @@ import MyReportsTab from "./MyReportsTab";
 
 import AuthorityReportsTab from "./AuthorityReportsTab";
 import HomeTab from "./HomeTab";
-import UsersTab from "../vet-components/UserTab";
+import UsersTab from "../Rwamagana-components/UserTab";
 import ReportTab from "./ReportTab";
 
 const TabContents = ({

@@ -1,14 +1,15 @@
-import { BiChevronDown } from "react-icons/bi";
+import { BiChevronDown, BiDotsVerticalRounded } from "react-icons/bi";
+import { useState, useEffect } from "react";
 import EditReport from "../../authentication/components/EditReeport";
 import DeleteReport from "../../authentication/components/DeleteReport";
 import ReplyComponent from "../../authentication/components/ReplyComponent";
 import { ToastContainer } from "react-toastify";
+import { getUserById } from "../../api_service/auth/auth";
 
 const ReportsTab = ({
   reportTab,
   setReportTab,
   reports,
-
   editMode,
   setEditMode,
   editingReportId,
@@ -24,26 +25,210 @@ const ReportsTab = ({
   handleDeleteConfirmed2,
   userToken,
 }) => {
-  const currentReports = reports.filter((r) => r.senderRole === reportTab);
+  // State for cell filtering
+  const [selectedCell, setSelectedCell] = useState("all");
+  
+  // Available cells for filtering
+  const availableCells = ["Gatare", "Karogo", "Kadasumbwa", "Ruseshe", "Nyakaliro"];
+  
+  // Filter reports based on current tab and selected cell
+  const getFilteredReports = () => {
+    let filteredReports = [];
+    
+    switch (reportTab) {
+      case "all":
+        filteredReports = reports;
+        break;
+      case "farmer":
+        filteredReports = reports.filter((r) => r.senderRole === "farmer");
+        break;
+      case "veterinarian":
+        filteredReports = reports.filter((r) => r.senderRole === "authority");
+        break;
+      default:
+        filteredReports = reports;
+    }
+    
+    // Apply cell filter if not "all"
+    if (selectedCell !== "all") {
+      filteredReports = filteredReports.filter((r) => r.cell === selectedCell);
+    }
+    
+    return filteredReports;
+  };
+
+  const currentReports = getFilteredReports();
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [showReplyModal, setShowReplyModal] = useState(null);
+  const [userNames, setUserNames] = useState({}); // Store user names by ID
+
+  useEffect(() => {
+    const fetchUserNames = async () => {
+      const uniqueUserIds = [
+        ...new Set(currentReports.map((r) => r.reportedBy)),
+      ];
+      console.log("Unique User IDs to fetch:", uniqueUserIds);
+      const names = {};
+
+      for (const userId of uniqueUserIds) {
+        if (!userId) {
+          console.log("Skipping undefined/null userId");
+          continue;
+        }
+
+        try {
+          console.log(`Fetching user with ID: ${userId}`);
+
+          // Create promises for setUser and setIsLoading callbacks
+          let userData = null;
+          let isLoading = false;
+
+          const setUser = (data) => {
+            userData = data;
+          };
+
+          const setIsLoading = (loading) => {
+            isLoading = loading;
+          };
+
+          // Call getUserById with the required parameters
+          await getUserById(userId, setUser, setIsLoading);
+
+          console.log("User data received:", userData);
+
+          if (userData && typeof userData === "object") {
+            // Try different possible field names for firstName
+            const firstName =
+              userData.firstName ||
+              userData.first_name ||
+              userData.name ||
+              userData.username ||
+              userData.email;
+            names[userId] = firstName || `User-${userId.slice(-4)}`;
+            console.log(`Set name for ${userId}:`, names[userId]);
+          } else {
+            console.log(`Invalid user data for ${userId}:`, userData);
+            names[userId] = `User-${userId.slice(-4)}`;
+          }
+        } catch (error) {
+          console.error(`Error fetching user with ID ${userId}:`, error);
+          names[userId] = `Error-${userId.slice(-4)}`;
+        }
+      }
+
+      console.log("Final userNames object:", names);
+      setUserNames(names);
+    };
+
+    if (currentReports.length > 0) {
+      fetchUserNames();
+    }
+  }, [currentReports]);
+
+  const toggleDropdown = (reportId) => {
+    setOpenDropdown(openDropdown === reportId ? null : reportId);
+  };
+
+  const handleActionClick = (action, report) => {
+    setOpenDropdown(null); // Close dropdown after action
+
+    switch (action) {
+      case "reply":
+        setShowReplyModal(report._id);
+        break;
+      case "edit":
+        handleEditClick(report);
+        break;
+      case "delete":
+        setSelectedReportId(report._id);
+        setShowConfirmModal2(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Get report counts for each category
+  const getReportCounts = () => {
+    const allReports = reports;
+    const farmerReports = reports.filter((r) => r.senderRole === "farmer");
+    const vetReports = reports.filter((r) => r.senderRole === "authority");
+    
+    return {
+      all: allReports.length,
+      farmer: farmerReports.length,
+      veterinarian: vetReports.length
+    };
+  };
+
+  const reportCounts = getReportCounts();
 
   return (
     <div className="space-y-6 text-sm">
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <ToastContainer></ToastContainer>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {["farmer", "veterinarian"].map((tab) => (
+        
+        {/* Report Type Tabs */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {[
+            { key: "all", label: "All Reports", count: reportCounts.all },
+            { key: "farmer", label: "Farmer Reports", count: reportCounts.farmer },
+            { key: "veterinarian", label: "Veterinarian Reports", count: reportCounts.authority }
+          ].map((tab) => (
             <button
-              key={tab}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                reportTab === tab
+              key={tab.key}
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
+                reportTab === tab.key
                   ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800"
               }`}
-              onClick={() => setReportTab(tab)}
+              onClick={() => setReportTab(tab.key)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Reports
+              {tab.label}
+              <span className={`px-2 py-1 rounded-full text-xs ${
+                reportTab === tab.key 
+                  ? "bg-white/20 text-white" 
+                  : "bg-gray-200 text-gray-600"
+              }`}>
+                {tab.count}
+              </span>
             </button>
           ))}
+        </div>
+
+        {/* Cell Filter Dropdown */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Filter by Cell
+          </label>
+          <div className="relative w-64">
+            <select
+              value={selectedCell}
+              onChange={(e) => setSelectedCell(e.target.value)}
+              className="w-full px-4 py-2 pr-8 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none cursor-pointer"
+            >
+              <option value="all">All Cells</option>
+              {availableCells.map((cell) => (
+                <option key={cell} value={cell}>
+                  {cell}
+                </option>
+              ))}
+            </select>
+            <BiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Results Summary */}
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600">
+            Showing <span className="font-semibold text-gray-900">{currentReports.length}</span> reports
+            {reportTab !== "all" && (
+              <span> from <span className="font-semibold text-blue-600">{reportTab}s</span></span>
+            )}
+            {selectedCell !== "all" && (
+              <span> in <span className="font-semibold text-green-600">{selectedCell}</span> cell</span>
+            )}
+          </p>
         </div>
 
         {editMode && (
@@ -58,6 +243,7 @@ const ReportsTab = ({
           </div>
         )}
 
+        {/* Reports Table */}
         <div className="overflow-hidden rounded-lg border border-gray-200">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -75,14 +261,23 @@ const ReportsTab = ({
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Symptoms
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {/* <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Pigs
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Vet
-                  </th>
+                  </th> */}
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Sender Role
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Reported By
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Created At
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Actions
@@ -90,121 +285,221 @@ const ReportsTab = ({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentReports.map((r, index) => (
-                  <tr
-                    key={r._id}
-                    className={`hover:bg-gray-50 transition-colors duration-150 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
-                    }`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {r.district}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {r.sector}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {r.cell}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
-                      {r.symptoms}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
-                      {r.numberOfPigsAffected}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {r.assignedTo || "None"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap relative">
-                      <select
-                        value={r.status}
-                        onChange={(e) =>
-                          handleStatusChange(r._id, e.target.value)
-                        }
-                        className={`
-                          inline-flex items-center px-2.5 py-0.5 pr-6 rounded-full text-xs font-medium 
-                          border border-opacity-50 cursor-pointer outline-none appearance-none
-                          focus:ring-2 focus:ring-offset-1 transition-all duration-200 
-                          ${
-                            r.status === "resolved"
-                              ? "bg-green-100 text-green-800 border-green-300 focus:ring-green-300"
-                              : r.status === "received"
-                              ? "bg-blue-100 text-blue-800 border-blue-300 focus:ring-blue-300"
-                              : "bg-yellow-100 text-yellow-800 border-yellow-300 focus:ring-yellow-300"
-                          }
-                        `}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="received">Received</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
-
-                      <BiChevronDown
-                        className={`
-                          absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 pointer-events-none
-                          ${
-                            r.status === "resolved"
-                              ? "text-green-600"
-                              : r.status === "received"
-                              ? "text-blue-600"
-                              : "text-yellow-600"
-                          }
-                        `}
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {reportTab === "farmer" && (
-                        <div className="flex items-center space-x-2">
-                          {/* <select
-                            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value={r.assignedVet || ""}
-                            onChange={(e) => assignVet(r._id, e.target.value)}
-                          >
-                            <option value="">Assign Vet</option>
-                            {users
-                              .filter((u) => u.role === "veterinarian")
-                              .map((v) => (
-                                <option key={v._id} value={v.email}>
-                                  {v.email}
-                                </option>
-                              ))}
-                          </select> */}
-                          <ReplyComponent
-                            reportId={r._id}
-                            senderRole="authority"
-                            token={userToken}
-                          />
-                          <button
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105"
-                            onClick={() => handleEditClick(r)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 transform hover:scale-105"
-                            onClick={() => {
-                              setSelectedReportId(r._id);
-                              setShowConfirmModal2(true);
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                {currentReports.length === 0 ? (
+                  <tr>
+                    <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
+                      <div className="flex flex-col items-center">
+                        <svg className="w-12 h-12 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="text-lg font-medium text-gray-900 mb-1">No reports found</p>
+                        <p className="text-sm text-gray-500">
+                          No reports match your current filters
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  currentReports.map((r, index) => (
+                    <tr
+                      key={r._id}
+                      className={`hover:bg-gray-50 transition-colors duration-150 ${
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      }`}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {r.district}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {r.sector}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {r.cell}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
+                        {r.symptoms}
+                      </td>
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">
+                        {r.numberOfPigsAffected}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {r.assignedTo || "None"}
+                      </td> */}
+                      <td className="px-6 py-4 whitespace-nowrap relative">
+                        <select
+                          value={r.status}
+                          onChange={(e) =>
+                            handleStatusChange(r._id, e.target.value)
+                          }
+                          className={`
+                            inline-flex items-center px-2.5 py-0.5 pr-6 rounded-full text-xs font-medium 
+                            border border-opacity-50 cursor-pointer outline-none appearance-none
+                            focus:ring-2 focus:ring-offset-1 transition-all duration-200 
+                            ${
+                              r.status === "resolved"
+                                ? "bg-green-100 text-green-800 border-green-300 focus:ring-green-300"
+                                : r.status === "received"
+                                ? "bg-blue-100 text-blue-800 border-blue-300 focus:ring-blue-300"
+                                : "bg-yellow-100 text-yellow-800 border-yellow-300 focus:ring-yellow-300"
+                            }
+                          `}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="received">Received</option>
+                          <option value="resolved">Resolved</option>
+                        </select>
+
+                        <BiChevronDown
+                          className={`
+                            absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 pointer-events-none
+                            ${
+                              r.status === "resolved"
+                                ? "text-green-600"
+                                : r.status === "received"
+                                ? "text-blue-600"
+                                : "text-yellow-600"
+                            }
+                          `}
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          r.senderRole === "farmer" 
+                            ? "bg-green-100 text-green-800"
+                            : "bg-purple-100 text-purple-800"
+                        }`}>
+                          {r.senderRole}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {userNames[r.reportedBy] || "Loading..."}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="relative">
+                          {/* More Actions Button */}
+                          <button
+                            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onClick={() => toggleDropdown(r._id)}
+                          >
+                            <BiDotsVerticalRounded className="w-5 h-5 text-gray-600" />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {openDropdown === r._id && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                              <div className="py-1">
+                                <button
+                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150"
+                                  onClick={() => handleActionClick("reply", r)}
+                                >
+                                  <svg
+                                    className="w-4 h-4 mr-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                                    />
+                                  </svg>
+                                  Reply
+                                </button>
+
+                                <button
+                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150"
+                                  onClick={() => handleActionClick("edit", r)}
+                                >
+                                  <svg
+                                    className="w-4 h-4 mr-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                  </svg>
+                                  Edit
+                                </button>
+
+                                <div className="border-t border-gray-100"></div>
+
+                                <button
+                                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                                  onClick={() => handleActionClick("delete", r)}
+                                >
+                                  <svg
+                                    className="w-4 h-4 mr-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
+      {/* Reply Modal */}
+      {showReplyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-[700px] mx-4">
+            <ReplyComponent
+              reportId={showReplyModal}
+              senderRole="authority"
+              token={userToken}
+            />
+            <button
+              className="mt-4 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+              onClick={() => setShowReplyModal(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {showConfirmModal2 && (
         <DeleteReport
           setShowConfirmModal2={setShowConfirmModal2}
           handleDeleteConfirmed2={handleDeleteConfirmed2}
         />
+      )}
+
+      {/* Click outside to close dropdown */}
+      {openDropdown && (
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setOpenDropdown(null)}
+        ></div>
       )}
     </div>
   );

@@ -26,7 +26,7 @@ import DeleteReport from "../authentication/components/DeleteReport";
 import ReplyComponent from "../authentication/components/ReplyComponent";
 import { BiChevronDown, BiHome } from "react-icons/bi";
 import { Link } from "react-router-dom";
-import HomeTab from "./vet-components/HomeTab";
+import HomeTab from "./Rwamagana-components/HomeTab";
 import Sidebar from "./ntunga-components/Sidebar";
 import TabContent from "./ntunga-components/TabContent";
 import Header from "./ntunga-components/Header";

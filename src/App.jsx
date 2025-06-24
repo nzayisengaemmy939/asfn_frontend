@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignIn from './authentication/pages/SignIn';
 import Signup from './authentication/pages/Signup';
 import FarmerDashboard from './dashboard/FarmerDashboard';
-import VeterinarianDashboard from './dashboard/VeterinarianDashboard';
+import VeterinarianDashboard from './dashboard/adminDashboard';
 import AuthorityDashboard from './dashboard/AuthorityDashboard';
 import ProfilePage from './authentication/components/ProfilePage';
 

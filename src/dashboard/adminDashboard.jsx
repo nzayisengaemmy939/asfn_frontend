@@ -3,9 +3,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getReport, getReports, vetReport } from "../api_service/report/report";
 import { getProfile } from "../api_service/auth/auth";
-import Sidebar from "./vet-components/Sidebar"; // Your existing Sidebar component
-import Header from "./vet-components/Header"; // Your existing Header component  
-import TabContents from "./vet-components/TabContents"; // Your existing TabContents component
+import Sidebar from "./Rwamagana-components/Sidebar"; // Your existing Sidebar component
+import Header from "./Rwamagana-components/Header"; // Your existing Header component  
+import TabContents from "./Rwamagana-components/TabContents"; // Your existing TabContents component
 
 export default function VeterinarianDashboard() {
   // State management
