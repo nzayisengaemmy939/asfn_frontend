@@ -23,11 +23,11 @@ const ReportsTable = ({
   const handleStatusChange = async (reportId, newStatus) => {
     try {
       // Update the report status in the local state immediately
-      setCurrentReports(prevReports =>
-        prevReports.map(report =>
-          report._id === reportId ? { ...report, status: newStatus } : report
-        )
-      );
+      // setCurrentReports(prevReports =>
+      //   prevReports.map(report =>
+      //     report._id === reportId ? { ...report, status: newStatus } : report
+      //   )
+      // );
 
       // 🔥 PUT YOUR STATUS UPDATE API CALL HERE 🔥
       // const response = await fetch(`/api/reports/${reportId}/status`, {
@@ -41,11 +41,11 @@ const ReportsTable = ({
     } catch (error) {
       console.error('Error updating status:', error);
       // Revert the change if the API call fails
-      setCurrentReports(prevReports =>
-        prevReports.map(report =>
-          report._id === reportId ? { ...report, status: report.status } : report
-        )
-      );
+      // setCurrentReports(prevReports =>
+      //   prevReports.map(report =>
+      //     report._id === reportId ? { ...report, status: report.status } : report
+      //   )
+      // );
     }
   };
 
@@ -66,25 +66,26 @@ const ReportsTable = ({
   const handleUpdateReport = async () => {
     try {
       // 🔥 PUT YOUR UPDATE REPORT API CALL HERE 🔥
-      // const response = await fetch(`/api/reports/${editingReport}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(editFormData)
-      // });
-      // if (!response.ok) throw new Error('Failed to update report');
+      const response = await fetch(`${frontend}/report/edit/${editingReport}}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData)
+      });
+      if (!response.ok) throw new Error('Failed to update report');
 
       // Update the report in the local state after successful API call
-      setCurrentReports(prevReports =>
-        prevReports.map(report =>
-          report._id === editingReport ? { ...report, ...editFormData } : report
-        )
-      );
-
+      // setCurrentReports(prevReports =>
+      //   prevReports.map(report =>
+      //     report._id === editingReport ? { ...report, ...editFormData } : report
+      //   )
+      // );
+toast.success("Report updated successfully")
       console.log(`Report ${editingReport} updated successfully`);
       setEditingReport(null);
       setEditFormData({});
     } catch (error) {
       console.error('Error updating report:', error);
+      toast.error('Error updating report:', error)
       // Keep the edit form open on error so user can try again
     }
   };
@@ -111,9 +112,9 @@ const ReportsTable = ({
       if (!response.ok) throw new Error('Failed to delete report');
 
     
-      setCurrentReports(prevReports =>
-        prevReports.filter(report => report._id !== reportToDelete)
-      );
+      // setCurrentReports(prevReports =>
+      //   prevReports.filter(report => report._id !== reportToDelete)
+      // );
      toast.success("report deleted successfully");
       console.log(`Report ${reportToDelete} deleted successfully`);
       setShowDeleteModal(false);

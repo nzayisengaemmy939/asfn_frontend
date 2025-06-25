@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiSearch, FiX, FiUser, FiMail, FiUserCheck } from "react-icons/fi";
 import { BiChevronDown } from "react-icons/bi";
 import { getUsers, deleteUser } from "../../api_service/auth/auth";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const UsersTab = ({ activeTab }) => {
   const [users, setUsers] = useState([]);
@@ -85,7 +85,8 @@ const UsersTab = ({ activeTab }) => {
 
       if (response.ok) {
         const updatedUser = await response.json();
-        alert('user updated successfully')
+        // alert('user updated successfully')
+        toast.success("User updated successfully")
         setUsers(prevUsers => 
           prevUsers.map(user => 
             user._id === editingUser._id ? { ...user, ...editForm } : user
@@ -151,7 +152,7 @@ const UsersTab = ({ activeTab }) => {
             </div>
           </div>
         </div>
-
+<ToastContainer></ToastContainer>
         <div className="overflow-hidden rounded-lg border border-gray-200">
           <div className="overflow-x-auto">
             <table className="w-full">
