@@ -4,7 +4,7 @@ import ReportsTab from '../ntunga-components/ReportsTab';
 import UsersTab from '../ntunga-components/UsersTab';
 
 import HomeTab from '../Rwamagana-components/HomeTab';
-import VetReportForm from '../../authentication/components/vetReportForm';
+import VetReportForm from"../../authentication/components/VetReportForm"
 import GuidanceComponent from './AddGuidance';
 import SendReportForm from '../../authentication/components/SendReportForm';
 
