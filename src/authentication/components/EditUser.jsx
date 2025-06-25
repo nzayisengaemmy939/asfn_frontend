@@ -62,7 +62,7 @@ const EditUser = ({ user, setShowEditModal }) => {
           >
             <option value="">{user.role}</option>
            
-            <option value="veterinarian">veterinarian</option>
+            {/* <option value="veterinarian">veterinarian</option> */}
             <option value="farmer">farmer</option>
             <option value="authority">authority</option>
           </select>

@@ -337,7 +337,7 @@ const UsersTab = ({ activeTab }) => {
                 >
                   <option value="">Select Role</option>
                   <option value="farmer">Farmer</option>
-                  <option value="veterinarian">Veterinarian</option>
+                  {/* <option value="veterinarian">Veterinarian</option> */}
                   <option value="authority">Authority</option>
                 </select>
               </div>
