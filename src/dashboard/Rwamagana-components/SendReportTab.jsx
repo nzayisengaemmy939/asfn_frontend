@@ -1,5 +1,4 @@
-import VetReportForm from "../../authentication/components/vetReportForm";
-
+import VetReportForm from "../../authentication/components/VetReportForm"
 const SendReportTab = () => {
   return (
     <div className="space-y-6">
